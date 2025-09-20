@@ -5,10 +5,7 @@ users:
     groups: wheel
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-        - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBuBeV0xG4GFLFu9sjWhmrd+gxzFhznCujLHSh0MGRY7a0aXW6ZiUf1P0aIbiIV8IhwR6+4QHa0H2MHRMo8mm+w=
-        - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBE6AAq/Ltuo3v8kwnPTP6/k7J9/nZ8vj7DBjCJxSxHn1eYGAwM8IEd8qpaWaB7HL5YQRfEEc0DbPqEDMTnUcpfs= marksista@DESKTOP-MARKSISTA-MANJARO
-        - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBN4iNR2iAFScDMku63yngd5UhZ/Qq0hCyAIFY5OUdL6DBXDJvPODCM/Vtlh49gmYBWT+3Qo6ya5g04R4oD++HuA= marksista@DESKTOP-MARKSISTA
-    ssh_import_id: ['lp:marksista'] 
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzaoAQLZNVv1MwQigPOPC563GT62xZXOdCvoqzHz1GV
 
 packages:
   - git
