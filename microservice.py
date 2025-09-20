@@ -175,7 +175,7 @@ def main():
         finally:
             logger.info(f"Prometheus metrics server started on port {port}")
             logger.info(f"Metrics available at: http://localhost:{port}/metrics")
-        while true:
+        while (1):
             time.sleep(50)
             
     except KeyboardInterrupt:
