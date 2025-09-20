@@ -5,7 +5,7 @@ users:
     groups: wheel
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzaoAQLZNVv1MwQigPOPC563GT62xZXOdCvoqzHz1GV
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC1o1ctpzDTfNCYrBZiseekgMq7YsOYTpzNtyYCBoNyquqnnarJNhPFhAFOjCdDhnTbFhrqEvLG7dEklz8r5/Av24s+PO0AP5Zpurf5w2x/HMBfYVDiVyC/3Xbge6MSvjxvds2la6Kszr0pXuC9SZX163M09bvStN5orbdgsLakYGXeBylai+e85JuBEWyxbXOW1fMJo0KBAT4/b22vkxsTuY6CCeQ3n6z732BzwwN04nWjjGnl2JG+jGSoodowFPYhywST6+xuvKH01NYmvL9MrGWzFteQUrAVDKPXksliocn+jMcLD+kM6tj1UVlYZN+oQ+XpRfEBjS0vtymAQtHj6VJFhR07/BbkztOw0yKzwTAXCe8jqgRwcQdIdeLXdmB47iXar8niSLUmIemyzm2avWXq/npJ7OD1J4fGkAe36Fs0eUkwBIZ4vYWhmfFZ3tA9yo+/qFPYam3sd9bNvMfG7IjxAxb3YwMx+3QyNM8gik6LVCnKpS2ilDU3ehigM70=
 
 packages:
   - git
