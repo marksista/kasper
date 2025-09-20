@@ -1,0 +1,165 @@
+#PLAY 1
+- name: Launch VM
+  hosts: local
+  gather_facts: no
+  vars:
+    deployment_method: "direct"
+
+  tasks:
+    - name: Create working directory
+      file:
+        path: /tmp/vm-deploy
+        state: directory
+
+    #- name: Install required packages
+    #  package:
+    #    name: [qemu-kvm, qemu-utils, curl, python3-pip]
+    #    state: present
+    #  become: yes
+
+    - name: Download VM creation script
+      get_url:
+        url: https://raw.githubusercontent.com/marksista/kasper/refs/heads/main/create-vm.zsh
+        dest: /tmp/vm-deploy/create-vm.zsh
+        mode: '0755'
+
+    - name: Download cloud-init ISO
+      get_url:
+        url: https://github.com/marksista/kasper/raw/refs/heads/main/cloud-init.iso
+        dest: /tmp/vm-deploy/cloud-init.iso
+    - name: Download AlmaLinuxCloud ISO
+      get_url:
+        url: https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
+        dest: /tmp/vm-deploy/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
+
+    - name: Launch VM and install packages
+      shell: |
+        cd /tmp/vm-deploy
+        nohup ./create-vm.zsh > vm.log 2>&1 &
+        sleep 120 
+
+    - name: Wait for VM SSH access
+      wait_for:
+        host: localhost
+        port: 2222
+        delay: 10
+        timeout: 180
+
+#PLAY 2
+- name: Deploy Microservice to VM
+  hosts: kaspersky-vm
+  gather_facts: no
+  vars:
+    deployment_method: "{{ hostvars['kaspersky-vm']['deployment_method'] | default('direct') }}"
+
+  tasks:
+
+    - name: Set deployment method fact
+      set_fact:
+        deploy_method: "{{ deployment_method }}"
+
+    #Direct 
+    - block:
+
+        - name: Install Python and pip in VM
+          become: yes
+          dnf:
+            name: [python3, python3-pip]
+            state: present
+
+        - name: Install prometheus-client
+          pip:
+            name: prometheus-client
+            executable: pip3
+
+        - name: Download microservice
+          get_url:
+            url: https://raw.githubusercontent.com/marksista/kasper/refs/heads/main/microservice.py
+            dest: /home/marksista/microservice.py
+            mode: '0755'
+
+        - name: Create systemd service file
+          become: yes
+          copy:
+          
+            content: |
+              [Unit]
+              Description=Environment Detection Microservice
+              After=network.target
+
+              [Service]
+              Type=simple
+              User=marksista
+              WorkingDirectory=/home/marksista
+              ExecStart=/usr/bin/python3 /home/marksista/microservice.py
+              Restart=always
+              RestartSec=10
+
+              [Install]
+              WantedBy=multi-user.target
+            dest: /etc/systemd/system/microservice.service
+
+        - name: Start and enable microservice
+          become: yes
+          systemd:
+            name: microservice
+            state: started
+            enabled: yes
+            daemon_reload: yes
+
+      when: deploy_method == "direct"
+
+    # Docker deployment
+    - block:
+        
+        - name: Download microservice
+          get_url:
+            url: https://raw.githubusercontent.com/marksista/kasper/refs/heads/main/microservice.py
+            dest: /home/marksista/microservice.py
+            mode: '0755'
+
+        - name: Download Dockerfile (for Docker deployment)
+          get_url:
+            url: https://raw.githubusercontent.com/marksista/kasper/refs/heads/main/Dockerfile
+            dest: /home/marksista/Dockerfile
+        
+        - name: Build Docker image
+          become: yes
+          community.docker.docker_image:
+            name: microservice
+            tag: latest
+            build:
+              path: /home/marksista
+            source: build
+
+        - name: Run microservice container
+          become: yes
+          community.docker.docker_container:
+            name: microservice-container
+            image: microservice:latest
+            state: started
+            restart_policy: unless-stopped
+            ports:
+              - "8080:8080"
+
+      when: deploy_method == "docker"
+
+# Play 3: Verify deployment
+- name: Verify Deployment
+  hosts: local
+  gather_facts: no
+  vars:
+    deployment_method: "{{ hostvars['kaspersky-vm']['deployment_method'] | default('direct') }}"
+
+  tasks:
+    - name: Wait for microservice to start
+      wait_for:
+        host: localhost
+        port: 8080
+        delay: 10
+        timeout: 60
+
+    - name: Test microservice endpoint
+      uri:
+        url: http://localhost:8080/metrics
+      register: result
