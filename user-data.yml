@@ -1,0 +1,27 @@
+#cloud-config
+hostname: kaspersky-1
+users:
+  - name: marksista
+    groups: wheel
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+        - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBuBeV0xG4GFLFu9sjWhmrd+gxzFhznCujLHSh0MGRY7a0aXW6ZiUf1P0aIbiIV8IhwR6+4QHa0H2MHRMo8mm+w=
+        - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBE6AAq/Ltuo3v8kwnPTP6/k7J9/nZ8vj7DBjCJxSxHn1eYGAwM8IEd8qpaWaB7HL5YQRfEEc0DbPqEDMTnUcpfs= marksista@DESKTOP-MARKSISTA-MANJARO
+        - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBN4iNR2iAFScDMku63yngd5UhZ/Qq0hCyAIFY5OUdL6DBXDJvPODCM/Vtlh49gmYBWT+3Qo6ya5g04R4oD++HuA= marksista@DESKTOP-MARKSISTA
+    ssh_import_id: ['lp:marksista'] 
+
+packages:
+  - git
+  - curl
+  - dnf-plugins-core
+  - python3
+  - python3-pip
+
+runcmd:
+  - firewall-cmd --permanent --add-port=8080/tcp && firewall-cmd --permanent --add-service=ssh
+  - firewall-cmd --reload
+  - dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  - dnf install -y docker-ce docker-ce-cli containerd.io
+  - systemctl enable --now docker
+  - usermod -aG docker marksista
+  - docker run hello-world
